@@ -171,7 +171,7 @@ def send_email(subject, body, recipients):
 st.set_page_config(page_title="Buscador y scraper de noticias", page_icon="📰")
 st.title("📰 Buscador y scraper de noticias")
 
-query = st.text_input("Ingrese palabra clave", "Formula 1")
+query = st.text_input("Ingrese palabra clave (en minuscula y separado por comas si hay más de una)", "Formula 1")
 lang = st.text_input("Lenguaje (e.g., en, es, fr)", "es")
 country = st.text_input("País (e.g., US, AR, FR)", "US")
 num_articles = st.slider("Número de artículos", 1, 50, 5)
