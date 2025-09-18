@@ -1,0 +1,6 @@
+streamlit
+requests
+beautifulsoup4
+newspaper3k
+mailjet-rest
+fake-useragent
