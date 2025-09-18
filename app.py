@@ -105,7 +105,6 @@
 #             st.error("❌ No se pudo enviar el email.")
 #     else:
 #         st.warning("No se encontraron artículos.")
-
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
@@ -125,10 +124,14 @@ ua = UserAgent()
 # -----------------------------
 # Scraper function
 # -----------------------------
-def scrape_gnews(query, lang="en", country="US", max_results=5):
+def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None):
     """
-    Scrape Google News article titles and links based on query, language, and country.
+    Scrape Google News article titles and links based on query, language, country, and optional date filter.
     """
+    # Add date filter if provided (e.g., when:7d, when:1m)
+    if date_filter:
+        query = f"{query} when:{date_filter}"
+
     url = f"https://news.google.com/search?q={query}&hl={lang}&gl={country}&ceid={country}:{lang}"
     r = requests.get(url, headers={'User-Agent': ua.chrome}, timeout=10)
     soup = BeautifulSoup(r.text, "html.parser")
@@ -154,7 +157,7 @@ def send_email(subject, body, recipients):
     data = {
       'Messages': [
         {
-          "From": {"Email": "anapaulacastillozuain@gmail.com", "Name": "News Bot"},
+          "From": {"Email": "cuenta.de.repuesto2021@gmail.com", "Name": "News Bot"},
           "To": [{"Email": r.strip(), "Name": r.strip()} for r in recipients],
           "Subject": subject,
           "TextPart": body
@@ -174,12 +177,22 @@ st.title("📰 Buscador y scraper de noticias")
 query = st.text_input("Ingrese palabra clave (en minuscula y separado por comas si hay más de una)", "Formula 1")
 lang = st.text_input("Lenguaje (e.g., en, es, fr)", "es")
 country = st.text_input("País (e.g., US, AR, FR)", "US")
+date_filter = st.selectbox(
+    "Filtrar por fecha",
+    options=["", "1d", "7d", "1m"],
+    format_func=lambda x: {
+        "": "Sin filtro",
+        "1d": "Últimas 24 horas",
+        "7d": "Última semana",
+        "1m": "Último mes"
+    }[x]
+)
 num_articles = st.slider("Número de artículos", 1, 50, 5)
 emails = st.text_area("Emails (separados con coma)", "team@example.com")
 
 if st.button("Buscar y enviar"):
     st.write("🔍 Scrapeando noticias...")
-    articles = scrape_gnews(query, lang=lang, country=country, max_results=num_articles)
+    articles = scrape_gnews(query, lang=lang, country=country, max_results=num_articles, date_filter=date_filter)
 
     if articles:
         st.success("✅ Artículos scrapeados exitosamente!")
