@@ -154,7 +154,7 @@ def send_email(subject, body, recipients):
     data = {
       'Messages': [
         {
-          "From": {"Email": "cuenta.de.repuesto2021@gmail.com", "Name": "News Bot"},
+          "From": {"Email": "anapaulacastillozuain@gmail.com", "Name": "News Bot"},
           "To": [{"Email": r.strip(), "Name": r.strip()} for r in recipients],
           "Subject": subject,
           "TextPart": body
