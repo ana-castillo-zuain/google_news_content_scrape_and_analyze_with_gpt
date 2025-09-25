@@ -140,8 +140,44 @@ def save_emails(emails):
 # -----------------------------
 # Scraper function
 # -----------------------------
+from newspaper import Article
+from transformers import pipeline
+from langdetect import detect
+
+# Load summarizers once
+summarizer_en = pipeline("summarization", model="facebook/bart-large-cnn")
+summarizer_es = pipeline("summarization", model="mrm8488/t5-base-spanish-summarizer")
+
+def get_article_text(url):
+    """Download article text from URL."""
+    try:
+        article = Article(url)
+        article.download()
+        article.parse()
+        return article.text
+    except:
+        return ""
+
+def summarize_text(text, max_len=130, min_len=30):
+    """Detect language and summarize accordingly."""
+    if not text or len(text.split()) < 50:
+        return "No se pudo generar resumen."
+
+    try:
+        lang = detect(text)
+    except:
+        lang = "unknown"
+
+    if lang == "en":
+        summary = summarizer_en(text, max_length=max_len, min_length=min_len, do_sample=False)
+        return summary[0]["summary_text"]
+    elif lang == "es":
+        summary = summarizer_es(text, max_length=max_len, min_length=min_len, do_sample=False)
+        return summary[0]["summary_text"]
+    else:
+        return "Idioma no soportado para resumen automático."
+
 def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None):
-    """Scrape Google News article titles, links, publisher and snippet."""
     if date_filter:
         query = f"{query} when:{date_filter}"
 
@@ -158,22 +194,24 @@ def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None
             link = "https://news.google.com" + link[1:]
         title = a.get_text(strip=True)
 
-        # Publisher: look upward in the DOM tree for the div
+        # Publisher
         publisher_tag = a.find_parent("article").select_one("div.SVJrMe")
         publisher = publisher_tag.get_text(strip=True) if publisher_tag else "Desconocido"
 
-        # Snippet: also inside the same article card
-        snippet_tag = a.find_parent("article").select_one("spanx.BNeawe.s3v9rd")
-        snippet = snippet_tag.get_text(strip=True) if snippet_tag else "Sin resumen disponible."
+        # Get full article + AI summary
+        text = get_article_text(link)
+        summary = summarize_text(text) if text else "Resumen no disponible."
 
         articles.append({
             "title": title,
             "url": link,
             "publisher": publisher,
-            "summary": snippet
+            "summary": summary
         })
 
     return articles
+
+
 
 # -----------------------------
 # Email sender
