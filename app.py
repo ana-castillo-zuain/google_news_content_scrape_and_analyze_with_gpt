@@ -150,24 +150,21 @@ def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None
     soup = BeautifulSoup(r.text, "html.parser")
 
     articles = []
-    raw_cards = soup.select("div.xrnccd")[:max_results]  # each news card
+    raw_links = soup.select("a.DY5T1d")[:max_results]
 
-    for card in raw_cards:
-        a = card.select_one("a.DY5T1d")
-        if not a:
-            continue
+    for a in raw_links:
         link = a["href"]
         if link.startswith("./"):
             link = "https://news.google.com" + link[1:]
         title = a.get_text(strip=True)
 
-        # Publisher
-        publisher = card.select_one("a.wEwyrc")
-        publisher = publisher.get_text(strip=True) if publisher else "Desconocido"
+        # Publisher: look upward in the DOM tree for the div
+        publisher_tag = a.find_parent("article").select_one("div.SVJrMe")
+        publisher = publisher_tag.get_text(strip=True) if publisher_tag else "Desconocido"
 
-        # Snippet
-        snippet = card.select_one("spanx.BNeawe")  # Google sometimes uses span for preview
-        snippet = snippet.get_text(strip=True) if snippet else "Sin resumen disponible."
+        # Snippet: also inside the same article card
+        snippet_tag = a.find_parent("article").select_one("spanx.BNeawe.s3v9rd")
+        snippet = snippet_tag.get_text(strip=True) if snippet_tag else "Sin resumen disponible."
 
         articles.append({
             "title": title,
