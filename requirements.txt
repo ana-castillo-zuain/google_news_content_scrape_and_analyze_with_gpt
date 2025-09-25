@@ -1,5 +1,9 @@
 streamlit
 requests
 beautifulsoup4
-mailjet-rest
+mailjet_rest
 fake-useragent
+newspaper3k
+transformers
+torch
+langdetect
