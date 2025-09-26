@@ -211,35 +211,29 @@ def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None
 # -----------------------------
 # Playwright to resolve final URL and extract text
 # -----------------------------
-from playwright.sync_api import sync_playwright
+import trafilatura
 
 def resolve_and_extract(gnews_url):
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
-        page = context.new_page()
-        page.goto(gnews_url, timeout=15000)
-        time.sleep(3)  # opcional, para asegurar carga completa
+    downloaded = trafilatura.fetch_url(gnews_url)
+    if not downloaded:
+        return {"publisher": "Desconocido", "url": gnews_url, "text": ""}
 
-        final_url = page.url
-        html = page.content()
-        soup = BeautifulSoup(html, "html.parser")
+    # Try to detect publisher
+    soup = BeautifulSoup(downloaded, "html.parser")
+    publisher = None
+    og_site = soup.find("meta", property="og:site_name")
+    if og_site:
+        publisher = og_site.get("content")
 
-        publisher = None
-        og_site = soup.find("meta", property="og:site_name")
-        if og_site:
-            publisher = og_site.get("content")
+    text = trafilatura.extract(downloaded, include_comments=False, include_tables=False)
+    if not text:
+        text = ""
 
-        paragraphs = [p.get_text(" ", strip=True) for p in soup.find_all("p")]
-        article_text = " ".join(paragraphs)
-
-        browser.close()
-
-        return {
-            "publisher": publisher or "Desconocido",
-            "url": final_url,
-            "text": article_text
-        }
+    return {
+        "publisher": publisher or "Desconocido",
+        "url": gnews_url,
+        "text": text
+    }
 
 # -----------------------------
 # Summarizers
