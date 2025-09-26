@@ -39,9 +39,9 @@ def save_emails(emails):
 # -----------------------------
 def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None):
     """
-    Scrape Google News article titles and links based on query, language,
-    country, and optional date filter.
+    Scrape Google News article titles and links based on query, language, country, and optional date filter.
     """
+    # Add date filter if provided (e.g., when:7d, when:1m)
     if date_filter:
         query = f"{query} when:{date_filter}"
 
@@ -49,9 +49,9 @@ def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None
     r = requests.get(url, headers={'User-Agent': ua.chrome}, timeout=10)
     soup = BeautifulSoup(r.text, "html.parser")
 
+    # Extract titles + links
     articles = []
     raw_links = soup.select("a.DY5T1d")[:max_results]
-
     for a in raw_links:
         link = a["href"]
         if link.startswith("./"):
@@ -60,6 +60,7 @@ def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None
         articles.append({"title": title, "url": link})
 
     return articles
+
 
 
 # -----------------------------
