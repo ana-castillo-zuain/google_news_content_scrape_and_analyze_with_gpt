@@ -311,6 +311,12 @@ num_articles = st.slider("Número de artículos", 1, 50, 5)
 emails = load_emails() 
 st.subheader("📧 Lista de emails") 
 
+# Always display the list
+if emails:
+    st.write("**Emails actuales:**", ", ".join(emails))
+else:
+    st.info("No hay emails guardados aún.")
+
 email_input = st.text_input("Agregar nuevo email") 
 if st.button("➕ Agregar"): 
     if email_input and email_input not in emails: 
