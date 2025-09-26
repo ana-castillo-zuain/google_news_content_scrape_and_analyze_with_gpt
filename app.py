@@ -244,7 +244,10 @@ def resolve_and_extract(gnews_url):
 # -----------------------------
 # Summarizers
 # -----------------------------
-summarizer_es = pipeline("summarization", model="mrm8488/t5-base-finetuned-summarization-es", device=-1)
+try:
+    summarizer_es = pipeline("summarization", model="mrm8488/bert2bert-finetuned-summarization-es", device=-1)
+except Exception as e:
+    st.error(f"No se pudo cargar el modelo de resumen en español: {e}")
 summarizer_en = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=-1)
 
 def summarize_text(text, lang="es"):
