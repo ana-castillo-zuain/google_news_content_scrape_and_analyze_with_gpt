@@ -162,7 +162,6 @@ from fake_useragent import UserAgent
 import os 
 import json 
 import time
-from selenium.webdriver.chrome.options import Options
 from transformers import pipeline
 
 # -----------------------------
