@@ -129,7 +129,7 @@ if st.button("Buscar y enviar"):
             st.markdown(f"**{a['title']}**  \n{a['summary']}  \n[{a['url']}]({a['url']})")
 
         body = "\n\n".join([
-            f"{a['title']} ({a['publisher']})\n{a['summary']}\n{a['url']}"
+            f"{a['title']} \n{a['summary']}\n{a['url']}"
             for a in articles
         ])
 
