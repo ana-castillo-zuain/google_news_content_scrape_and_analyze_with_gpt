@@ -246,7 +246,7 @@ def resolve_and_extract(gnews_url):
 # -----------------------------
 # Summarizers
 # -----------------------------
-summarizer_es = pipeline("summarization", model="mrm8488/bert2bert_shared-spanish-finetuned-summarization")
+summarizer_es = pipeline("summarization", model="google/pegasus-xsum")
 summarizer_en = pipeline("summarization", model="facebook/bart-large-cnn")
 
 def summarize_text(text, lang="es"):
