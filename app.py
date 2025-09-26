@@ -244,8 +244,8 @@ def resolve_and_extract(gnews_url):
 # -----------------------------
 # Summarizers
 # -----------------------------
-summarizer_es = pipeline("summarization", model="google/pegasus-xsum")
-summarizer_en = pipeline("summarization", model="facebook/bart-large-cnn")
+summarizer_es = pipeline("summarization", model="mrm8488/t5-base-finetuned-summarization-es", device=-1)
+summarizer_en = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=-1)
 
 def summarize_text(text, lang="es"):
     text = text[:3000]  # evitar input demasiado largo
