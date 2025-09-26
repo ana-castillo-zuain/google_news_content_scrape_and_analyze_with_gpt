@@ -244,15 +244,42 @@ def resolve_and_extract(gnews_url):
 # -----------------------------
 # Summarizers
 # -----------------------------
-summarizer_es = pipeline("summarization", model='mrm8488/bert2bert_shared-spanish-finetuned-summarization', device=-1)
-summarizer_en = pipeline("summarization", model="sshleifer/distilbart-cnn-12-6", device=-1)
+
+import requests
+
+HF_HEADERS = {"Authorization": f"Bearer {st.secrets['hf_api_key']}"}
+
+MODELS = {
+    "es": "mrm8488/bert2bert_shared-spanish-finetuned-summarization",
+    "en": "sshleifer/distilbart-cnn-12-6"
+}
+
+def hf_summarize(text, lang="es"):
+    model_id = MODELS.get(lang, MODELS["en"])
+    API_URL = f"https://api-inference.huggingface.co/models/{model_id}"
+
+    payload = {
+        "inputs": text[:3000],  # truncate to avoid oversized payloads
+        "parameters": {"min_length": 40, "max_length": 130}
+    }
+    response = requests.post(API_URL, headers=HF_HEADERS, json=payload)
+
+    if response.status_code == 200:
+        data = response.json()
+        if isinstance(data, list) and len(data) > 0 and "summary_text" in data[0]:
+            return data[0]["summary_text"]
+        else:
+            return "⚠️ No se pudo generar resumen"
+    else:
+        return f"❌ Error {response.status_code}: {response.text}"
+
 
 def summarize_text(text, lang="es"):
     text = text[:3000]  # evitar input demasiado largo
     if lang == "es":
-        return summarizer_es(text, max_length=130, min_length=40, do_sample=False)[0]["summary_text"]
+        return hf_summarize(text, max_length=130, min_length=40, do_sample=False)[0]["summary_text"]
     else:
-        return summarizer_en(text, max_length=130, min_length=40, do_sample=False)[0]["summary_text"]
+        return hf_summarize(text, max_length=130, min_length=40, do_sample=False)[0]["summary_text"]
 
 # -----------------------------
 # Email sender 
@@ -308,7 +335,8 @@ if st.button("Buscar y enviar"):
         for a in articles: 
             try:
                 info = resolve_and_extract(a["url"])
-                resumen = summarize_text(info["text"], lang if lang in ["es", "en"] else "en")
+                resumen = hf_summarize(info["text"], lang if lang in ["es", "en"] else "en")
+
 
                 st.markdown(f"**{a['title']}**") 
                 st.write(f"Fuente: {info['publisher']}") 
