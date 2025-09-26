@@ -47,7 +47,7 @@ def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None
     # Extract titles + links
     articles = []
     raw_links = soup.select("a.DY5T1d")[:max_results]
-    snippets = soup.select("span.Y3v8qd")  # o prueba también .Y3v8qd
+    snippets = soup.select("spanxBbh9")  # o prueba también .Y3v8qd
 
     for i, a in enumerate(raw_links):
         link = a["href"]
