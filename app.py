@@ -126,7 +126,7 @@ if st.button("Buscar y enviar"):
     if articles:
         st.success("✅ Artículos scrapeados exitosamente!")
         for a in articles:
-            st.markdown(f"**{a['title']}**  \n{a['summary']}  \n[{a['url']}]({a['url']})")
+            st.markdown(f"**{a['title']}**  \n*{a['publisher']}*  \n{a['summary']}  \n[{a['url']}]({a['url']})")
 
         body = "\n\n".join([
             f"{a['title']} \n{a['summary']}\n{a['url']}"
