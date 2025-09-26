@@ -82,7 +82,7 @@ if st.button("➕ Agregar"):
     save_emails(emails) 
     st.success(f"{email_input} agregado!") 
 
-remove_input = st.selectbox("Eliminar email", [""] + emails) 
+remove_input = st.selectbox("Eliminar email", [""] + list(emails)) 
 if st.button("➖ Eliminar") and remove_input: 
     emails.remove(remove_input) 
     save_emails(emails) 
