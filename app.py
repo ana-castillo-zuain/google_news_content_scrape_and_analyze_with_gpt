@@ -211,34 +211,37 @@ def scrape_gnews(query, lang="en", country="US", max_results=5, date_filter=None
     return articles 
 
 # -----------------------------
-# Selenium to resolve final URL and extract text
+# Playwright to resolve final URL and extract text
 # -----------------------------
-options = Options()
-options.add_argument("--headless")
-options.add_argument("--disable-gpu")
-options.add_argument("--no-sandbox")
-driver = webdriver.Chrome(options=options)
+from playwright.sync_api import sync_playwright
 
 def resolve_and_extract(gnews_url):
-    driver.get(gnews_url)
-    time.sleep(3)
-    final_url = driver.current_url
-    html = driver.page_source
-    soup = BeautifulSoup(html, "html.parser")
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        context = browser.new_context()
+        page = context.new_page()
+        page.goto(gnews_url, timeout=15000)
+        time.sleep(3)  # opcional, para asegurar carga completa
 
-    publisher = None
-    og_site = soup.find("meta", property="og:site_name")
-    if og_site:
-        publisher = og_site.get("content")
+        final_url = page.url
+        html = page.content()
+        soup = BeautifulSoup(html, "html.parser")
 
-    paragraphs = [p.get_text(" ", strip=True) for p in soup.find_all("p")]
-    article_text = " ".join(paragraphs)
+        publisher = None
+        og_site = soup.find("meta", property="og:site_name")
+        if og_site:
+            publisher = og_site.get("content")
 
-    return {
-        "publisher": publisher or "Desconocido",
-        "url": final_url,
-        "text": article_text
-    }
+        paragraphs = [p.get_text(" ", strip=True) for p in soup.find_all("p")]
+        article_text = " ".join(paragraphs)
+
+        browser.close()
+
+        return {
+            "publisher": publisher or "Desconocido",
+            "url": final_url,
+            "text": article_text
+        }
 
 # -----------------------------
 # Summarizers

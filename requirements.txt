@@ -3,8 +3,8 @@ requests
 beautifulsoup4
 mailjet-rest
 fake-useragent
-selenium
 transformers
 torch
+playwright
 sentencepiece   
 
